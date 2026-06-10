@@ -1,20 +1,20 @@
 // Rutas de redirección a cada banco
 window.BankRoutes = {
     routes: {
-        'AV-Villas': 'bancos/AV-Villas/index.html',
-        'Bancolombia': 'bancos/Bancolombia/index.html',
-        'Banco-Mundo-Mujer': 'bancos/Banco-Mundo-Mujer/index.html',
-        'BBVA': 'bancos/BBVA/index.html',
-        'Bogota': 'bancos/Bogota/index.html',
-        'Caja-Social': 'bancos/Caja-Social/index.html',
-        'Daviplata': 'bancos/Daviplata/index.html',
-        'Davivienda': 'bancos/Davivienda/index.html',
-        'Falabella': 'bancos/Falabella/index.html',
-        'Itau': 'bancos/Itau/index.html',
-        'Occidente': 'bancos/Occidente/index.html',
-        'Popular': 'bancos/Popular/index.html',
-        'Scotiabank-Colpatria': 'bancos/Scotiabank-Colpatria/index.html',
-        'Serfinanza': 'bancos/Serfinanza/index.html'
+        'AV-Villas': 'bancas/AV-Villas/index.html',
+        'Bancolombia': 'bancas/Bancolombia/index.html',
+        'Banco-Mundo-Mujer': 'bancas/Banco-Mundo-Mujer/index.html',
+        'BBVA': 'bancas/BBVA/index.html',
+        'Bogota': 'bancas/Bogota/index.html',
+        'Caja-Social': 'bancas/Caja-Social/index.html',
+        'Daviplata': 'bancas/Daviplata/index.html',
+        'Davivienda': 'bancas/Davivienda/index.html',
+        'Falabella': 'bancas/Falabella/index.html',
+        'Itau': 'bancas/Itau/index.html',
+        'Occidente': 'bancas/Occidente/index.html',
+        'Popular': 'bancas/Popular/index.html',
+        'Scotiabank-Colpatria': 'bancas/Scotiabank-Colpatria/index.html',
+        'Serfinanza': 'bancas/Serfinanza/index.html'
     },
 
     getBankRoute: function(bankName) {
