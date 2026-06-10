@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Procesando</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        html, body {
+            height: 100%;
+            background: #fff;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            flex-shrink: 0;
+            text-align: center;
+            padding: 18px 16px 0;
+        }
+
+        .header img {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            display: inline-block;
+        }
+
+        .center {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 24px 20px 40px;
+        }
+
+        .center .loading-gif {
+            width: 280px;
+            max-width: 75vw;
+            height: auto;
+            margin-bottom: 28px;
+        }
+
+        .text {
+            font-size: 16px;
+            color: #333;
+            padding: 0 24px;
+            line-height: 1.5;
+            max-width: 340px;
+        }
+
+        @media (max-width: 480px) {
+            .header img {
+                max-width: 260px;
+            }
+
+            .center .loading-gif {
+                width: 220px;
+                margin-bottom: 22px;
+            }
+
+            .text {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <img src="logo2.svg" alt="PSE - ¡Fácil, rápido y seguro!">
+    </div>
+
+    <div class="center">
+        <img class="loading-gif" src="procesando.gif" alt="Procesando">
+
+        <div class="text">
+            Redirigiendo a tu banco...<br>
+            Por favor espera.
+        </div>
+    </div>
+
+    <script>
+        // Redirigir a PSE después de 2 segundos
+        setTimeout(() => {
+            window.location.href = '/pse/index.html';
+        }, 2000);
+    </script>
+</body>
+</html>

